@@ -13,8 +13,8 @@ if (!fs.existsSync(MEDUSA_SERVER_PATH)) {
 
 // Copy pnpm-lock.yaml
 fs.copyFileSync(
-  path.join(process.cwd(), "bun-lock.yaml"),
-  path.join(MEDUSA_SERVER_PATH, "bun-lock.yaml"),
+  path.join(process.cwd(), "bun.lockb"),
+  path.join(MEDUSA_SERVER_PATH, "bun.lockb"),
 );
 
 // Copy .env if it exists
