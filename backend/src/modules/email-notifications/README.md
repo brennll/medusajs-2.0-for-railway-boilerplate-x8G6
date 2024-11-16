@@ -5,7 +5,7 @@ This directory contains all the email templates used in the application using `r
 Run the following command to start the development server:
 
 ```bash
-pnpm email:dev
+bun email:dev
 ```
 
 This will start a react-email server at `http://localhost:3002` where you can preview the email templates.
@@ -29,17 +29,17 @@ To send a notification using an email template, specify the template key and req
 ```typescript
 await notificationModuleService.createNotifications({
   to: invite.email,
-  channel: 'email',
+  channel: "email",
   template: EmailTemplates.INVITE_USER, // Use the enum for the template key
   data: {
     emailOptions: {
-      replyTo: 'info@example.com',
+      replyTo: "info@example.com",
       subject: "You've been invited!",
     },
     inviteLink: `${BACKEND_URL}/app/invite?token=${invite.token}`,
-    preview: 'Get started with your invitation...',
+    preview: "Get started with your invitation...",
   },
-})
+});
 ```
 
 ### Adding a new template
@@ -51,40 +51,46 @@ To add a new email template:
 Add a new file in the templates directory, following the `react-email` component style and using the base template. For example, `new-template.tsx`:
 
 ```tsx
-import { Text } from '@react-email/components'
-import * as React from 'react'
-import { Base } from './base'
+import { Text } from "@react-email/components";
+import * as React from "react";
+import { Base } from "./base";
 
-export const NEW_TEMPLATE_KEY = 'new-template'
+export const NEW_TEMPLATE_KEY = "new-template";
 
 export interface NewTemplateProps {
-  greeting: string
-  actionUrl: string
-  preview?: string
+  greeting: string;
+  actionUrl: string;
+  preview?: string;
 }
 
 export const isNewTemplateData = (data: any): data is NewTemplateProps =>
-  typeof data.greeting === 'string' && typeof data.actionUrl === 'string'
+  typeof data.greeting === "string" && typeof data.actionUrl === "string";
 
-export const NewTemplate = ({ greeting, actionUrl, preview = 'You have a new message' }: NewTemplateProps) => (
+export const NewTemplate = ({
+  greeting,
+  actionUrl,
+  preview = "You have a new message",
+}: NewTemplateProps) => (
   <Base preview={preview}>
     <Text>{greeting}</Text>
-    <Text>Click <a href={actionUrl}>here</a> to take action.</Text>
+    <Text>
+      Click <a href={actionUrl}>here</a> to take action.
+    </Text>
   </Base>
-)
+);
 
 // Add preview props for the email dev server
 NewTemplate.PreviewProps = {
-  greeting: 'Hello there!',
-  actionUrl: 'https://example.com/action',
-  preview: 'Preview of the new template'
-} as NewTemplateProps
+  greeting: "Hello there!",
+  actionUrl: "https://example.com/action",
+  preview: "Preview of the new template",
+} as NewTemplateProps;
 ```
 
 #### 2. Add the new template key to the `EmailTemplates` enum:
 
 ```typescript
-import { NEW_TEMPLATE_KEY } from './new-template'
+import { NEW_TEMPLATE_KEY } from "./new-template";
 
 export enum EmailTemplates {
   // ...
@@ -93,60 +99,68 @@ export enum EmailTemplates {
 ```
 
 #### 3. Add template handling to `generateEmailTemplate`
+
 Update the `generateEmailTemplate` function to handle the new template:
 
 ```tsx
-import NewTemplate, { NEW_TEMPLATE_KEY, isNewTemplateData } from './new-template'
+import NewTemplate, {
+  NEW_TEMPLATE_KEY,
+  isNewTemplateData,
+} from "./new-template";
 
 export enum EmailTemplates {
   // ...
   NEW_TEMPLATE = NEW_TEMPLATE_KEY,
 }
 
-export function generateEmailTemplate(templateKey: string, data: unknown): ReactNode {
+export function generateEmailTemplate(
+  templateKey: string,
+  data: unknown,
+): ReactNode {
   switch (templateKey) {
     // ...
     case EmailTemplates.NEW_TEMPLATE:
       if (!isNewTemplateData(data)) {
         throw new MedusaError(
           MedusaError.Types.INVALID_DATA,
-          `Invalid data for template "${EmailTemplates.NEW_TEMPLATE}"`
-        )
+          `Invalid data for template "${EmailTemplates.NEW_TEMPLATE}"`,
+        );
       }
-      return (<NewTemplate {...data} />)
+      return <NewTemplate {...data} />;
     default:
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
         `Unknown template key: "${templateKey}"`,
-      )
+      );
   }
 }
 ```
 
 #### 4. Trigger the new template in a subscriber
+
 Finally, call `createNotifications` with the new template key and data
 
 ```typescript
 await notificationModuleService.createNotifications({
   to: user.email,
-  channel: 'email',
+  channel: "email",
   template: EmailTemplates.NEW_TEMPLATE, // or 'new-template'
   data: {
     emailOptions: {
-      subject: 'Action Required',
-      replyTo: 'support@example.com',
+      subject: "Action Required",
+      replyTo: "support@example.com",
     },
-    greeting: 'Hello there!',
+    greeting: "Hello there!",
     actionUrl: `${BACKEND_URL}/take-action?token=${user.token}`,
-    preview: 'An important action is awaiting you...',
+    preview: "An important action is awaiting you...",
   },
-})
+});
 ```
 
 ## Additional Info & Documentation
 
 I based this module off of [@typed-dev/medusa-notification-resend](https://github.com/typed-development/medusa-notification-resend) but added
-the ability to use `react-email` templates and extended the functionality to include more Resend options. 
+the ability to use `react-email` templates and extended the functionality to include more Resend options.
 
 In the original module, you're limited to just `subject`, `from`, `to`, the body, and the attachments. You also could
 only send HTML, which means you have to render the email body using `@react-email/render` instead of using the
@@ -154,8 +168,8 @@ only send HTML, which means you have to render the email body using `@react-emai
 
 ### Medusa
 
-* Guide: [How to Create a Notification Provider Module](https://docs.medusajs.com/resources/references/notification-provider-module)
-* Getting Started: [Events & Subscribers](https://docs.medusajs.com/learn/basics/events-and-subscribers) 
+- Guide: [How to Create a Notification Provider Module](https://docs.medusajs.com/resources/references/notification-provider-module)
+- Getting Started: [Events & Subscribers](https://docs.medusajs.com/learn/basics/events-and-subscribers)
 
 ### React Email
 
@@ -165,4 +179,4 @@ You can also use [these example templates](https://demo.react.email/preview/magi
 
 ### Resend
 
-* Docs: [Node.js Quickstart](https://resend.com/docs/send-with-nodejs)
+- Docs: [Node.js Quickstart](https://resend.com/docs/send-with-nodejs)
